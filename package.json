@@ -1,0 +1,27 @@
+{
+  "name": "claude-api-test",
+  "version": "1.0.0",
+  "description": "API testing tool for Claude Code Leaderboard",
+  "main": "debug_api.js",
+  "type": "module",
+  "scripts": {
+    "start": "node debug_api.js",
+    "test": "node debug_api.js --generate heavy",
+    "heavy": "node debug_api.js --single t_heavy heavy",
+    "medium": "node debug_api.js --single t_heavy medium",
+    "light": "node debug_api.js --single t_heavy light"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "claude-code",
+    "api-test",
+    "load-test",
+    "leaderboard"
+  ],
+  "author": "API Tester",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
