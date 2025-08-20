@@ -1,0 +1,47 @@
+name: Claude API Heavy Load Test
+
+on:
+  schedule:
+    # 每分钟执行一次
+    - cron: '* * * * *'
+  
+  # 手动触发
+  workflow_dispatch:
+
+jobs:
+  heavy-load-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js 18
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Execute Heavy Load Test
+      run: |
+        echo "🔥 Starting heavy load test..."
+        echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")"
+        echo "Target: https://api.claudecount.com/api/usage/hook"
+        echo "User: @t_heavy (ID: 5432109876)"
+        echo "Model: claude-opus-4-1-20250805"
+        echo "---"
+        
+        # 执行测试
+        node debug_api.js --single t_heavy heavy
+        
+        echo "---"
+        echo "✅ Heavy load test completed"
+      continue-on-error: true
+      
+    - name: Log execution info
+      if: always()
+      run: |
+        echo "Execution details:"
+        echo "- Workflow: ${{ github.workflow }}"
+        echo "- Run number: ${{ github.run_number }}"
+        echo "- Commit: ${{ github.sha }}"
+        echo "- Event: ${{ github.event_name }}"
