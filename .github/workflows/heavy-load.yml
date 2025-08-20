@@ -28,10 +28,11 @@ jobs:
         echo "Target: https://api.claudecount.com/api/usage/hook"
         echo "User: @t_heavy (ID: 5432109876)"
         echo "Model: claude-opus-4-1-20250805"
+        echo "Token ranges: ~99K input, ~31K output, ~299K cache"
         echo "---"
         
-        # 执行测试
-        node debug_api.js --single t_heavy heavy
+        # 执行测试 (使用 npm script)
+        npm run heavy
         
         echo "---"
         echo "✅ Heavy load test completed"
@@ -45,3 +46,4 @@ jobs:
         echo "- Run number: ${{ github.run_number }}"
         echo "- Commit: ${{ github.sha }}"
         echo "- Event: ${{ github.event_name }}"
+        echo "- Node version: $(node --version)"
