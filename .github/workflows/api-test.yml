@@ -1,0 +1,79 @@
+name: API Test Runner
+
+on:
+  # 定时运行 - 每天北京时间上午9点 (UTC+8 = UTC 1:00)
+  schedule:
+    - cron: "* * * * *"
+
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: "运行次数 (默认10次)"
+        required: false
+        default: "10"
+        type: string
+      delay:
+        description: "请求间隔秒数 (默认1秒)"
+        required: false
+        default: "1"
+        type: string
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: 🔧 安装依赖
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+
+      - name: 🧪 运行API测试脚本
+        run: |
+          echo "🚀 开始运行API测试..."
+          echo "📊 运行次数: ${{ github.event.inputs.runs || '10' }}"
+          echo "⏱️ 请求间隔: ${{ github.event.inputs.delay || '1' }}秒"
+          echo ""
+          node test_api_script.js
+        env:
+          # 如果需要认证token，可以在这里设置环境变量
+          # OAUTH_TOKEN: ${{ secrets.OAUTH_TOKEN }}
+          # OAUTH_TOKEN_SECRET: ${{ secrets.OAUTH_TOKEN_SECRET }}
+          RUNS: ${{ github.event.inputs.runs || '10' }}
+          DELAY: ${{ github.event.inputs.delay || '1' }}
+
+      - name: 📋 生成测试报告
+        if: always()
+        run: |
+          echo "## API测试报告 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **运行时间**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **触发方式**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "- **运行次数**: ${{ github.event.inputs.runs || '10' }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **请求间隔**: ${{ github.event.inputs.delay || '1' }}秒" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- **运行状态**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+      # 可选：保存测试结果到artifact
+      - name: 📁 保存测试日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-logs-${{ github.run_number }}
+          path: |
+            *.log
+          retention-days: 7
