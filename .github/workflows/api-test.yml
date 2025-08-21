@@ -1,9 +1,9 @@
 name: API Test Runner
 
 on:
-  # 定时运行 - 每天北京时间上午9点 (UTC+8 = UTC 1:00)
+  # 定时运行 - 每20分钟执行一次
   schedule:
-    - cron: "* * * * *"
+    - cron: "*/20 * * * *"
 
   # 手动触发
   workflow_dispatch:
@@ -27,26 +27,13 @@ jobs:
       - name: 📥 检出代码
         uses: actions/checkout@v4
 
-      - name: 📦 设置Node.js环境
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-          cache: "npm"
-
-      - name: 🔧 安装依赖
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-          else
-            echo "No package.json found, skipping npm install"
-          fi
-
       - name: 🧪 运行API测试脚本
         run: |
           echo "🚀 开始运行API测试..."
           echo "📊 运行次数: ${{ github.event.inputs.runs || '10' }}"
           echo "⏱️ 请求间隔: ${{ github.event.inputs.delay || '1' }}秒"
           echo ""
+          echo "Node.js版本: $(node --version)"
           node test_api_script.js
         env:
           # 如果需要认证token，可以在这里设置环境变量
