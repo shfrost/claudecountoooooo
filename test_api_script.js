@@ -14,6 +14,22 @@ function generateInteractionData() {
   return { timestamp, interaction_id: messageId, interaction_hash };
 }
 
+// 生成随机tokens，范围在基准值的70%-100%之间
+function generateRandomTokens(baseTokens) {
+  const randomInRange = (base) => {
+    const min = Math.floor(base * 0.7);
+    const max = base;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  return {
+    input: randomInRange(baseTokens.input),
+    output: randomInRange(baseTokens.output),
+    cache_creation: randomInRange(baseTokens.cache_creation),
+    cache_read: randomInRange(baseTokens.cache_read)
+  };
+}
+
 // 发送API请求
 async function sendRequest(payload) {
   return new Promise((resolve, reject) => {
@@ -91,8 +107,12 @@ async function runTestScript() {
       // 生成新的时间戳和交互数据
       const { timestamp, interaction_id, interaction_hash } = generateInteractionData();
 
+      // 生成随机tokens
+      const randomTokens = generateRandomTokens(basePayload.tokens);
+
       const payload = {
         ...basePayload,
+        tokens: randomTokens,
         timestamp,
         interaction_id,
         interaction_hash
@@ -101,6 +121,7 @@ async function runTestScript() {
       console.log(`📤 时间戳: ${timestamp}`);
       console.log(`🔗 交互ID: ${interaction_id}`);
       console.log(`🔒 交互Hash: ${interaction_hash.substring(0, 16)}...`);
+      console.log(`🎯 Tokens: input=${randomTokens.input}, output=${randomTokens.output}, cache_creation=${randomTokens.cache_creation}, cache_read=${randomTokens.cache_read}`);
 
       await sendRequest(payload);
       successCount++;
