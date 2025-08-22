@@ -6,20 +6,19 @@ import https from 'https';
 // 生成随机interaction_id和interaction_hash
 function generateInteractionData() {
   const timestamp = new Date().toISOString();
-  const randomId = crypto.randomBytes(16).toString('hex');
-  const interaction_id = `int_${randomId}`;
+  const messageId = `msg_${crypto.randomBytes(12).toString('hex')}`;
+  const requestId = crypto.randomUUID();
   const interaction_hash = crypto.createHash('sha256')
-    .update(`${timestamp}${interaction_id}${Math.random()}`)
+    .update(`${timestamp}|${messageId}|${requestId}`)
     .digest('hex');
-  
-  return { timestamp, interaction_id, interaction_hash };
+  return { timestamp, interaction_id: messageId, interaction_hash };
 }
 
 // 发送API请求
 async function sendRequest(payload) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(payload);
-    
+
     const options = {
       hostname: 'api.claudecount.com',
       port: 443,
@@ -62,13 +61,13 @@ async function runTestScript() {
   // 从环境变量获取配置，如果没有则使用默认值
   const totalRuns = parseInt(process.env.RUNS) || 10;
   const delaySeconds = parseInt(process.env.DELAY) || 1;
-  
+
   console.log('🧪 开始批量测试API接口');
   console.log('='.repeat(50));
   console.log(`🎯 总共运行: ${totalRuns} 次`);
   console.log(`⏱️ 请求间隔: ${delaySeconds} 秒`);
   console.log('='.repeat(50));
-  
+
   const basePayload = {
     "twitter_handle": "@AwesomeCC_",
     "twitter_user_id": "5432109882",
@@ -91,7 +90,7 @@ async function runTestScript() {
     try {
       // 生成新的时间戳和交互数据
       const { timestamp, interaction_id, interaction_hash } = generateInteractionData();
-      
+
       const payload = {
         ...basePayload,
         timestamp,
